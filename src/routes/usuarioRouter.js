@@ -2,7 +2,7 @@ import express from "express";
 const router = express.Router();
 
 import controller from "../controllers/usuarioControllers.js";
-import authControllers from "../controllers/authControllers.js";
+import authControllers from "../controllers/authController.js";
 
 router.get("/", authControllers.verificarToken, controller.getAll);
 router.post("/criar", controller.criarUsuario);

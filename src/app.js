@@ -1,25 +1,34 @@
 import express from "express";
+import cors from "cors";
+import * as dotenv from "dotenv";
+dotenv.config();
+
+import authRoutes from "./routes/authRoutes.js";
+import empresaRoutes from "./routes/empresaRoutes.js";
+import administradorRoutes from "./routes/administradorRoutes.js";
+import colaboradorRoutes from "./routes/colaboradorRoutes.js";
+import conteudoRoutes from "./routes/conteudoRoutes.js";
+
+import db from "./database/mongoConfig.js";
+
 const app = express();
 
-import cors from "cors";
 app.use(cors());
-
-import * as dotenv from "dotenv";
-dotenv.config()
-
 app.use(express.json());
 
-import db from "./database/mongoConfig.js"
 db.connect();
 
-import usuarioRoutes from "./routes/usuarioRouter.js"
+app.use("/auth", authRoutes);
+app.use("/empresa", empresaRoutes);
+app.use("/admin", administradorRoutes);
+app.use("/colaborador", colaboradorRoutes);
+app.use("/conteudo", conteudoRoutes);
 
-app.use("/usuario", usuarioRoutes)
-
-app.post("/api/users", (req, res) => {
-    console.log(req.body);
-})
-
-
+app.get("/", (req, res) => {
+  res.status(200).json({
+    statusCode: 200,
+    message: "API em funcionamento"
+  });
+});
 
 export default app;
