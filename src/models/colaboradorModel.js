@@ -14,6 +14,10 @@ const ColaboradorSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  cargo: {
+    type: String,
+    required: false
+  },
   data_nascimento: {
     type: Date,
     required: true
@@ -26,7 +30,11 @@ const ColaboradorSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Administrador',
     required: true
-  }
+  },
+  cards_vinculados: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Conteudo'
+  }]
 }, { timestamps: true });
 
 export default mongoose.model("Colaborador", ColaboradorSchema);
