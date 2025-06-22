@@ -4,7 +4,8 @@ import {
   getColaboradorById,
   getAllColaboradores,
   updateColaborador,
-  deleteColaborador
+  deleteColaborador,
+  getCardsDoColaborador
 } from "../controllers/colaboradorController.js";
 import { verificarToken } from "../controllers/authController.js";
 
@@ -16,5 +17,6 @@ router.get("/id/:id", verificarToken, getColaboradorById);
 router.get("/all", verificarToken, getAllColaboradores);
 router.put("/:id", verificarToken, updateColaborador);
 router.delete("/:id", verificarToken, deleteColaborador);
+router.get("/:id/cards", verificarToken, getCardsDoColaborador);
 
 export default router;
