@@ -12,8 +12,8 @@ const router = express.Router();
 
 router.post("/", createAdministrador);
 
-router.get("/id/:id", verificarToken, getAdministradorById);
-router.get("/all", verificarToken, getAllAdministradores);
+router.get("/id/:id", getAdministradorById);
+router.get("/all", getAllAdministradores);
 router.put("/:id", verificarToken, updateAdministrador);
 router.delete("/:id", verificarToken, deleteAdministrador);
 
