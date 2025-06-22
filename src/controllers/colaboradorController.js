@@ -1,11 +1,11 @@
 import Colaborador from "../models/colaboradorModel.js";
+import Conteudo from "../models/conteudoModel.js";
 import bcrypt from 'bcrypt';
 
 export const createColaborador = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, cards_vinculados = [] } = req.body;
     const existingColab = await Colaborador.findOne({ email });
-    
     if (existingColab) {
       return res.status(400).json({
         statusCode: 400,
@@ -13,14 +13,25 @@ export const createColaborador = async (req, res) => {
       });
     }
 
+    // Validação dos cards_vinculados
+    if (cards_vinculados.length > 0) {
+      const count = await Conteudo.countDocuments({ _id: { $in: cards_vinculados } });
+      if (count !== cards_vinculados.length) {
+        return res.status(400).json({
+          statusCode: 400,
+          message: "Um ou mais cards_vinculados não existem."
+        });
+      }
+    }
+
     const hashedPassword = bcrypt.hashSync(req.body.senha, 10);
     const novoColab = new Colaborador({
       ...req.body,
-      senha: hashedPassword
+      senha: hashedPassword,
+      cards_vinculados
     });
 
     const colabSalvo = await novoColab.save();
-    
     res.status(201).json({
       statusCode: 201,
       message: "Colaborador criado com sucesso!",
@@ -128,5 +139,21 @@ export const deleteColaborador = async (req, res) => {
       statusCode: 500,
       message: error.message
     });
+  }
+};
+
+export const getCardsDoColaborador = async (req, res) => {
+  try {
+    const colaborador = await Colaborador.findById(req.params.id)
+      .populate('cards_vinculados');
+    if (!colaborador) {
+      return res.status(404).json({ message: "Colaborador não encontrado" });
+    }
+    res.status(200).json({
+      statusCode: 200,
+      cards: colaborador.cards_vinculados
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
