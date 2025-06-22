@@ -10,6 +10,9 @@ const ConteudoSchema = new mongoose.Schema({
     required: true,
     default: 'DOCUMENTOS_IMPORTANTES'
   },
+  setor: {
+    type: String
+  },
   corpo: {
     type: String
   },
