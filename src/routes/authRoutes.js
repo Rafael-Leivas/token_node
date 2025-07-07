@@ -1,6 +1,6 @@
 import express from "express";
 import { 
-  loginEmpresa as login,
+  loginUnificado,  // Remova o "as login"
   registerEmpresa as register,
   verificarToken,
   criarAdministrador,
@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 router.post("/register", register);
-router.post("/login", login);
+router.post("/login", loginUnificado);  // Use loginUnificado diretamente
 
 router.post("/administradores", verificarToken, somenteEmpresa, criarAdministrador);
 
