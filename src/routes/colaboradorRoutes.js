@@ -5,7 +5,10 @@ import {
   getAllColaboradores,
   updateColaborador,
   deleteColaborador,
-  getCardsDoColaborador
+  getCardsDoColaborador,
+  vincularCards,
+  desvincularCards,
+  substituirCards
 } from "../controllers/colaboradorController.js";
 import { verificarToken } from "../controllers/authController.js";
 
@@ -18,5 +21,8 @@ router.get("/all", verificarToken, getAllColaboradores);
 router.put("/:id", verificarToken, updateColaborador);
 router.delete("/:id", verificarToken, deleteColaborador);
 router.get("/:id/cards", verificarToken, getCardsDoColaborador);
+router.post("/:id/cards/vincular", verificarToken, vincularCards);
+router.post("/:id/cards/desvincular", verificarToken, desvincularCards);
+router.put("/:id/cards", verificarToken, substituirCards);
 
 export default router;
