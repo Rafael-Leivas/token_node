@@ -157,3 +157,145 @@ export const getCardsDoColaborador = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// VINCULAR CARDS A UM COLABORADOR
+export const vincularCards = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { cards_vinculados } = req.body;
+
+    if (!cards_vinculados || !Array.isArray(cards_vinculados)) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: "cards_vinculados deve ser um array"
+      });
+    }
+
+    // Validar se os cards existem
+    if (cards_vinculados.length > 0) {
+      const count = await Conteudo.countDocuments({ _id: { $in: cards_vinculados } });
+      if (count !== cards_vinculados.length) {
+        return res.status(400).json({
+          statusCode: 400,
+          message: "Um ou mais cards não existem."
+        });
+      }
+    }
+
+    // Atualizar colaborador adicionando os novos cards (sem duplicar)
+    const colaborador = await Colaborador.findByIdAndUpdate(
+      id,
+      { $addToSet: { cards_vinculados: { $each: cards_vinculados } } },
+      { new: true }
+    ).populate('cards_vinculados');
+
+    if (!colaborador) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "Colaborador não encontrado"
+      });
+    }
+
+    res.status(200).json({
+      statusCode: 200,
+      message: "Cards vinculados com sucesso!",
+      data: colaborador
+    });
+  } catch (error) {
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message
+    });
+  }
+};
+
+// DESVINCULAR CARDS DE UM COLABORADOR
+export const desvincularCards = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { cards_vinculados } = req.body;
+
+    if (!cards_vinculados || !Array.isArray(cards_vinculados)) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: "cards_vinculados deve ser um array"
+      });
+    }
+
+    // Remover cards do colaborador
+    const colaborador = await Colaborador.findByIdAndUpdate(
+      id,
+      { $pull: { cards_vinculados: { $in: cards_vinculados } } },
+      { new: true }
+    ).populate('cards_vinculados');
+
+    if (!colaborador) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "Colaborador não encontrado"
+      });
+    }
+
+    res.status(200).json({
+      statusCode: 200,
+      message: "Cards desvinculados com sucesso!",
+      data: colaborador
+    });
+  } catch (error) {
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message
+    });
+  }
+};
+
+// SUBSTITUIR TODOS OS CARDS DE UM COLABORADOR
+export const substituirCards = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { cards_vinculados } = req.body;
+
+    if (!Array.isArray(cards_vinculados)) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: "cards_vinculados deve ser um array"
+      });
+    }
+
+    // Validar se os cards existem
+    if (cards_vinculados.length > 0) {
+      const count = await Conteudo.countDocuments({ _id: { $in: cards_vinculados } });
+      if (count !== cards_vinculados.length) {
+        return res.status(400).json({
+          statusCode: 400,
+          message: "Um ou mais cards não existem."
+        });
+      }
+    }
+
+    // Substituir todos os cards
+    const colaborador = await Colaborador.findByIdAndUpdate(
+      id,
+      { cards_vinculados },
+      { new: true }
+    ).populate('cards_vinculados');
+
+    if (!colaborador) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "Colaborador não encontrado"
+      });
+    }
+
+    res.status(200).json({
+      statusCode: 200,
+      message: "Cards atualizados com sucesso!",
+      data: colaborador
+    });
+  } catch (error) {
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message
+    });
+  }
+};
