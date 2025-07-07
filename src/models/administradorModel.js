@@ -17,7 +17,6 @@ const AdministradorSchema = new mongoose.Schema({
   empresa: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Empresa',
-    // required: true
   },
   isAdmin: {
     type: Boolean,
