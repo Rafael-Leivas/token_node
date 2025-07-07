@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import Empresa from "../models/empresaModel.js";
 import Administrador from "../models/administradorModel.js";
+import Colaborador from "../models/colaboradorModel.js";
 
 dotenv.config();
 const SECRET = process.env.SECRET || 'seuSegredoSuperSecreto';
@@ -121,6 +122,106 @@ export const loginEmpresa = async (req, res) => {
   }
 };
 
+// LOGIN UNIFICADO
+export const loginUnificado = async (req, res) => {
+  try {
+    const { email, senha } = req.body;
+    let usuario = null;
+    let tipoUsuario = null;
+
+    // Verificar se é Empresa
+    usuario = await Empresa.findOne({ email });
+    if (usuario) {
+      tipoUsuario = 'empresa';
+    }
+
+    // Verificar se é Administrador
+    if (!usuario) {
+      usuario = await Administrador.findOne({ email });
+      if (usuario) {
+        tipoUsuario = 'administrador';
+      }
+    }
+
+    // Verificar se é Colaborador
+    if (!usuario) {
+      usuario = await Colaborador.findOne({ email });
+      if (usuario) {
+        tipoUsuario = 'colaborador';
+      }
+    }
+
+    if (!usuario) {
+      return res.status(401).json({
+        statusCode: 401,
+        message: "Credenciais inválidas"
+      });
+    }
+
+    // Verificar senha
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    if (!senhaValida) {
+      return res.status(401).json({
+        statusCode: 401,
+        message: "Credenciais inválidas"
+      });
+    }
+
+    // Gerar token
+    const token = jwt.sign(
+      {
+        id: usuario._id,
+        email: usuario.email,
+        role: tipoUsuario
+      },
+      SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Estrutura de resposta corrigida
+    const responseData = {
+      token,
+      tipoUsuario  // ESTE CAMPO ESTAVA SENDO DEFINIDO MAS NÃO RETORNADO CORRETAMENTE
+    };
+
+    // Adicionar dados específicos do tipo de usuário
+    if (tipoUsuario === 'empresa') {
+      responseData.empresa = {
+        id: usuario._id,
+        nome: usuario.nome,
+        email: usuario.email
+      };
+    } else if (tipoUsuario === 'administrador') {
+      responseData.administrador = {
+        id: usuario._id,
+        nome_completo: usuario.nome_completo,
+        email: usuario.email,
+        isAdmin: usuario.isAdmin
+      };
+    } else if (tipoUsuario === 'colaborador') {
+      responseData.colaborador = {
+        id: usuario._id,
+        nome_completo: usuario.nome_completo,
+        email: usuario.email,
+        setor: usuario.setor,
+        cargo: usuario.cargo
+      };
+    }
+
+    res.status(200).json({
+      statusCode: 200,
+      message: "Login realizado com sucesso!",
+      data: responseData
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message
+    });
+  }
+};
+
 // CRIAÇÃO DE ADMINISTRADOR PELA EMPRESA
 export const criarAdministrador = async (req, res) => {
   try {
@@ -213,6 +314,7 @@ export const somenteEmpresa = (req, res, next) => {
 export default {
   registerEmpresa,
   loginEmpresa,
+  loginUnificado,
   criarAdministrador,
   verificarToken,
   somenteEmpresa
