@@ -1,4 +1,5 @@
 import Conteudo from "../models/conteudoModel.js";
+import Colaborador from "../models/colaboradorModel.js";
 
 export const createConteudo = async (req, res) => {
   try {
@@ -101,6 +102,52 @@ export const deleteConteudo = async (req, res) => {
       message: "Conteúdo removido com sucesso!",
       data: conteudoDeletado
     });
+  } catch (error) {
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message
+    });
+  }
+};
+
+export const getConteudosByColaborador = async (req, res) => {
+  try {
+    const { userid } = req.params;
+
+    const colaborador = await Colaborador.findById(userid)
+      .populate({
+        path: 'cards_vinculados',
+        populate: {
+          path: 'id_administrador',
+          select: 'nome_completo email'
+        }
+      });
+
+    if (!colaborador) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "Colaborador não encontrado"
+      });
+    }
+
+    const conteudosDisponiveis = colaborador.cards_vinculados;
+
+    res.status(200).json({
+      statusCode: 200,
+      message: "Conteúdos do colaborador encontrados com sucesso!",
+      data: {
+        colaborador: {
+          id: colaborador._id,
+          nome_completo: colaborador.nome_completo,
+          email: colaborador.email,
+          setor: colaborador.setor,
+          cargo: colaborador.cargo
+        },
+        conteudos: conteudosDisponiveis,
+        total: conteudosDisponiveis.length
+      }
+    });
+
   } catch (error) {
     res.status(500).json({
       statusCode: 500,
