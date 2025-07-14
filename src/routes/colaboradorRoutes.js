@@ -19,7 +19,7 @@ router.post("/", createColaborador);
 router.get("/id/:id", verificarToken, getColaboradorById);
 router.get("/all", verificarToken, getAllColaboradores);
 router.put("/:id", verificarToken, updateColaborador);
-router.delete("/:id", verificarToken, deleteColaborador);
+router.delete("/:id", deleteColaborador);
 router.get("/:id/cards", verificarToken, getCardsDoColaborador);
 router.post("/:id/cards/vincular", verificarToken, vincularCards);
 router.post("/:id/cards/desvincular", verificarToken, desvincularCards);
